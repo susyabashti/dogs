@@ -6,7 +6,7 @@
 
 struct route routes[] = {
     {"/api/health", health_handler},
-    {"/api/dogs", get_dogs_handler},
+    {"/api/dogs/*", get_dogs_handler},
     {NULL, NULL}, // sentinel
 };
 

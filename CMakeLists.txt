@@ -31,9 +31,14 @@ endif()
 # Find PostgreSQL
 # -------------------------------------------------
 find_package(PostgreSQL REQUIRED)
-if(NOT PostgreSQL_FOUND)
-    message(FATAL_ERROR "PostgreSQL client library not found. Please install it (brew install postgresql on macOS, apt install libpq-dev on Linux).")
-endif()
+
+# ---- FIX FOR STATIC libpq ----
+# libpgcommon.a and libpgport.a require math functions (log, sin, sqrt)
+# PostgreSQL::PostgreSQL does NOT declare the dependency.
+# Patch the imported target cleanly so CMake links correctly.
+set_property(TARGET PostgreSQL::PostgreSQL APPEND PROPERTY
+    INTERFACE_LINK_LIBRARIES m
+)
 
 # -------------------------------------------------
 # CivetWeb static library
@@ -42,7 +47,6 @@ add_library(civetweb_lib STATIC src/vendors/civetweb/civetweb.c)
 target_include_directories(civetweb_lib PUBLIC src/vendors/civetweb)
 target_compile_definitions(civetweb_lib PRIVATE NO_SSL NO_WEBSOCKET NO_FILES)
 
-# Disable warnings for CivetWeb (keep -Werror for your code)
 if(NOT MSVC)
     target_compile_options(civetweb_lib PRIVATE -w)
 endif()
@@ -57,7 +61,6 @@ if(NOT MSVC)
     target_compile_options(cjson PRIVATE -w)
 endif()
 
-
 # -------------------------------------------------
 # Main executable
 # -------------------------------------------------
@@ -66,6 +69,7 @@ add_executable(dogs_api
     src/http/http.c
     src/http/router.c
     src/db/db.c
+    src/logging/logging.c
     src/db_health/db_health.c
     src/handlers/health_check.c
     src/handlers/get_dogs.c
@@ -78,24 +82,12 @@ target_include_directories(dogs_api PRIVATE
 
 target_link_libraries(dogs_api PRIVATE
     civetweb_lib
-    PostgreSQL::PostgreSQL
     cjson
+    PostgreSQL::PostgreSQL   # <-- now includes math dependency cleanly
+    pthread
+    dl
 )
 
-# -------------------------------------------------
-# System libraries
-# -------------------------------------------------
-if(UNIX)
-    target_link_libraries(dogs_api PRIVATE pthread)
-endif()
-
-if(UNIX AND NOT APPLE)
-    target_link_libraries(dogs_api PRIVATE dl)
-endif()
-
-# -------------------------------------------------
-# Optional: suppress EOF newline warnings (if any)
-# -------------------------------------------------
 if(NOT MSVC)
     target_compile_options(dogs_api PRIVATE -Wno-newline-eof)
 endif()

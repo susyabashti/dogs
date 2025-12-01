@@ -22,7 +22,7 @@ int health_handler(struct mg_connection *conn, void *ignored)
   unsigned long len = (unsigned long)strlen(str);
   mg_send_http_ok(conn, "application/json", len);
   mg_write(conn, str, len);
+  cJSON_free(str);
   cJSON_Delete(json);
-  free(str);
   return 200;
 }

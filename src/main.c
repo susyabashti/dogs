@@ -5,8 +5,17 @@
 #include "db/db.h"
 #include "string.h"
 #include "db_health/db_health.h"
+#include "unistd.h"
 
 #define PORT "8080"
+
+static int keep_running = 1;
+
+void sigint_handler(int sig)
+{
+  (void)sig;
+  keep_running = 0;
+}
 
 int main(void)
 {
@@ -29,8 +38,10 @@ int main(void)
   register_routes(ctx);
   printf("Server started on http://127.0.0.1:%s. Press Enter to stop...\n", PORT);
 
-  // Keep the server running until a key is pressed
-  getchar();
+  while (keep_running)
+  {
+    sleep(1);
+  }
 
   http_server_stop();
   db_pool_destroy();

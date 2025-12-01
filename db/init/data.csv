@@ -1,0 +1,118 @@
+breed,country_origin,fur_color,eye_colors,character_traits,common_health_problems,min_height,max_height,min_longevity,max_longevity
+Labrador Retriever,Canada,"Yellow, Black, Chocolate",Brown,"Loyal, friendly, intelligent, energetic, good-natured","Hip dysplasia, obesity, ear infections",21,24,10,12
+German Shepherd,Germany,"Black, Tan",Brown,"Loyal, intelligent, protective, confident, trainable","Hip dysplasia, elbow dysplasia, pancreatitis",22,26,7,10
+Bulldog,England,"White, Red",Brown,"Loyal, calm, gentle, brave","Skin allergies, respiratory issues, obesity",12,16,8,10
+Poodle,France,"White, Black, Brown, Apricot","Brown, Blue","Intelligent, active, affectionate, hypoallergenic","Hip dysplasia, epilepsy, bladder stones",10,15,12,15
+Beagle,England,"White, Tan, Red, Lemon",Brown,"Curious, friendly, energetic, good-natured","Ear infections, hip dysplasia, epilepsy",13,15,12,15
+Chihuahua,Mexico,"Black, Brown, Tan, White","Brown, Blue","Loyal, energetic, confident, sensitive","Dental problems, eye issues, respiratory issues",6,9,12,20
+Boxer,Germany,"Fawn, Brindle",Brown,"Loyal, energetic, intelligent, playful, protective","Hip dysplasia, cancer, heart conditions",21,25,10,12
+Golden Retriever,Scotland,Golden,Brown,"Intelligent, friendly, kind, loyal, good-natured","Hip dysplasia, cancer, skin allergies",21,24,10,12
+Pug,China,"Fawn, Black",Brown,"Loyal, playful, affectionate, social, charming","Eye problems, respiratory issues, obesity",10,14,12,15
+Rottweiler,Germany,"Black, Tan",Brown,"Loyal, protective, confident, strong","Hip dysplasia, cancer, elbow dysplasia",22,27,8,10
+Siberian Husky,Russia,"Black, White",Blue,"Independent, energetic, intelligent, playful, strong","Hip dysplasia, eye problems, hereditary myopathy",21,24,12,15
+Dachshund,Germany,"Black, Tan","Brown, Blue","Loyal, energetic, playful, curious","Intervertebral disc disease, hip dysplasia, diabetes",5,9,12,15
+Shih Tzu,China,"Black, White, Brown",Brown,"Affectionate, playful, confident, good-natured","Dental problems, respiratory issues, eye problems",9,10,10,16
+Bichon Frise,France,White,Brown,"Playful, affectionate, intelligent, social","Dental problems, eye problems, bladder stones",9,11,12,15
+Australian Shepherd,Australia,"Black, Red","Brown, Blue","Intelligent, energetic, loyal, trainable","Hip dysplasia, eye problems, epilepsy",18,23,12,15
+Basset Hound,France,"Black, Tan",Brown,"Affectionate, patient, gentle, good-natured","Dental problems, ear infections, obesity",11,15,10,12
+Cocker Spaniel,England,"Black, Brown",Brown,"Affectionate, intelligent, energetic, good-natured","Ear infections, hip dysplasia, eye problems",14,15,12,15
+French Bulldog,France,"White, Black, Brindle",Brown,"Affectionate, playful, good-natured","Breathing problems, eye problems, hip dysplasia",11,12,10,12
+Pomeranian,Germany,"Orange, Sable, Black",Brown,"Playful, energetic, intelligent, good-natured","Dental problems, eye problems, obesity",6,7,12,16
+Great Dane,Germany,"Black, Blue, Fawn, Harlequin",Brown,"Gentle, loyal, intelligent, good-natured","Hip dysplasia, cancer, heart conditions",28,34,8,10
+Mastiff,England,"Apricot, Fawn",Brown,"Loyal, gentle, protective, good-natured","Hip dysplasia, heart conditions, cancer",30,34,8,10
+Newfoundland,Canada,"Black, Brown, Grey",Brown,"Loyal, intelligent, gentle, good-natured","Hip dysplasia, heart conditions, cancer",26,28,9,11
+Saint Bernard,Switzerland,"Red, White",Brown,"Loyal, intelligent, gentle, protective","Hip dysplasia, cancer, heart conditions",26,30,8,10
+Old English Sheepdog,England,"Blue, Grey",Brown,"Gentle, intelligent, good-natured, protective","Hip dysplasia, eye problems, skin allergies",22,26,10,12
+Irish Wolfhound,Ireland,"Grey, Red, Black",Brown,"Gentle, loyal, intelligent, good-natured","Hip dysplasia, heart conditions, cancer",30,35,6,8
+Greyhound,England,"Black, White, Brindle",Brown,"Intelligent, athletic, sensitive, good-natured","Hip dysplasia, eye problems, heart conditions",26,30,10,12
+Scottish Deerhound,Scotland,"Blue, Grey",Brown,"Gentle, intelligent, good-natured, independent","Hip dysplasia, heart conditions, cancer",28,32,8,10
+Great Pyrenees,France,White,Brown,"Loyal, intelligent, gentle, protective","Hip dysplasia, cancer, skin allergies",25,32,10,12
+Shar Pei,China,"Cream, Fawn",Brown,"Independent, loyal, intelligent, good-natured","Skin allergies, eye problems, hip dysplasia",18,20,8,12
+Doberman Pinscher,Germany,"Black, Red",Brown,"Loyal, energetic, intelligent, protective","Hip dysplasia, heart conditions, cancer",24,28,10,12
+Weimaraner,Germany,"Silver, Grey","Blue, Grey","Energetic, intelligent, good-natured, loyal","Hip dysplasia, eye problems, cancer",25,29,10,12
+Belgian Malinois,Belgium,"Fawn, Mahogany",Brown,"Intelligent, energetic, loyal, protective","Hip dysplasia, eye problems, skin allergies",22,26,12,14
+Rhodesian Ridgeback,Rhodesia,Light Wheaten,Brown,"Intelligent, athletic, loyal, good-natured","Hip dysplasia, eye problems, cancer",25,27,10,12
+English Setter,England,"Black, White, Liver",Brown,"Intelligent, energetic, affectionate, good-natured","Hip dysplasia, eye problems, cancer",23,27,12,15
+Pointer,England,"Black, White, Liver",Brown,"Intelligent, energetic, good-natured, affectionate","Hip dysplasia, eye problems, cancer",21,27,12,15
+Gordon Setter,Scotland,"Black, Tan",Brown,"Intelligent, energetic, good-natured, affectionate","Hip dysplasia, eye problems, cancer",23,27,12,15
+Irish Setter,Ireland,Red,Brown,"Intelligent, energetic, good-natured, affectionate","Hip dysplasia, eye problems, cancer",24,28,12,15
+Papillon,France,"White, Black, Sable, Red",Brown,"Intelligent, energetic, affectionate, good-natured","Dental problems, eye problems, bladder stones",8,11,14,16
+Pekingese,China,"Black, White, Red",Brown,"Independent, intelligent, affectionate, good-natured","Dental problems, respiratory issues, eye problems",6,9,12,15
+Toy Poodle,France,"White, Black, Brown, Apricot","Brown, Blue","Intelligent, active, affectionate, hypoallergenic","Hip dysplasia, epilepsy, bladder stones",10,11,12,15
+Miniature Poodle,France,"White, Black, Brown, Apricot","Brown, Blue","Intelligent, active, affectionate, hypoallergenic","Hip dysplasia, epilepsy, bladder stones",10,15,12,15
+Standard Poodle,France,"White, Black, Brown, Apricot","Brown, Blue","Intelligent, active, affectionate, hypoallergenic","Hip dysplasia, epilepsy, bladder stones",15,22,12,15
+Affenpinscher,Germany,"Black, Brown, Red",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye problems, skin allergies",9,11,12,15
+Boston Terrier,United States,"Black, White",Brown,"Intelligent, energetic, affectionate, good-natured","Eye problems, respiratory issues, skin allergies",15,17,11,13
+Brussels Griffon,Belgium,"Black, Red",Brown,"Intelligent, energetic, affectionate, good-natured","Dental problems, eye problems, respiratory issues",7,10,12,15
+Cairn Terrier,Scotland,"Black, Wheaten, Red",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye problems, skin allergies",10,12,12,15
+Chinese Crested,China,"Pink, White, Black",Brown,"Intelligent, energetic, affectionate, good-natured","Dental problems, eye problems, skin allergies",11,13,13,18
+Miniature Schnauzer,Germany,"Black, Salt & Pepper, White",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, pancreatitis, diabetes",12,14,12,15
+Standard Schnauzer,Germany,"Black, Salt & Pepper",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, pancreatitis, diabetes",18,20,12,15
+West Highland White Terrier,Scotland,White,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, skin allergies, hip dysplasia",11,12,12,16
+Australian Terrier,Australia,"Red, Black & Tan",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, skin allergies, hip dysplasia",10,11,12,15
+Border Terrier,England,"Red, Wheaten, Black",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, skin allergies, hip dysplasia",10,16,12,16
+Coton de Tulear,Madagascar,White,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, skin allergies, hip dysplasia",9,11,12,14
+English Toy Spaniel,England,"White, Blenheim",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, skin allergies, hip dysplasia",10,12,12,14
+Australian Stumpy Tail Cattle Dog,Australia,"Red, Black",Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",17,20,12,14
+Pug,China,"Black, Fawn",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, respiratory issues, eye problems",10,14,12,15
+American Eskimo Dog,United States,White,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, skin allergies, hip dysplasia",15,19,12,15
+Australian Cattle Dog,Australia,"Blue, Red",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, skin allergies, hip dysplasia",17,20,12,16
+Basset Hound,France,"Black, White, Red",Brown,"Gentle, good-natured, loyal, intelligent","Dental problems, eye issues, skin allergies",11,15,10,12
+Australian Kelpie,Australia,"Red, Black",Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",17,20,12,14
+Bloodhound,England,"Red, Black",Brown,"Loyal, intelligent, good-natured, energetic","Dental problems, eye issues, skin allergies",22,27,10,12
+Border Collie,England,"Black, White, Red",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",18,22,12,15
+Australian Shepherd,Australia,Blue Merle,Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",20,23,12,14
+American Bulldog,United States,"White, Red",Brown,"Loyal, intelligent, good-natured, energetic","Dental problems, eye issues, skin allergies",20,28,10,12
+Australian Shepherd,Australia,"Black, Red",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, skin allergies, hip dysplasia",18,23,12,15
+Borzoi,Russia,"White, Cream, Red",Brown,"Gentle, good-natured, loyal, intelligent","Dental problems, eye issues, skin allergies",26,29,10,12
+Bull Terrier,England,"White, Red",Brown,"Loyal, intelligent, good-natured, energetic","Dental problems, eye issues, skin allergies",20,22,10,12
+Cane Corso,Italy,"Black, Red",Brown,"Loyal, intelligent, good-natured, energetic","Dental problems, eye issues, skin allergies",22,28,10,12
+Cardigan Welsh Corgi,Wales,"Red, Sable, Black",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",10,12,12,14
+Chesapeake Bay Retriever,United States,"Brown, Tan",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",21,26,12,14
+Saluki,Middle East,"Cream, Red",Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",23,28,12,14
+English Setter,England,"Liver, Blue",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",25,27,12,14
+English Springer Spaniel,England,"Black, White, Liver",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",20,24,12,14
+Field Spaniel,England,"Black, Liver",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",15,18,12,14
+Finnish Spitz,Finland,"Red, Golden",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",15,20,12,15
+Flat-Coated Retriever,England,"Black, Liver",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",22,25,12,14
+Australian Terrier,Australia,Red,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",10,11,12,15
+Giant Schnauzer,Germany,"Black, Salt & Pepper",Brown,"Loyal, intelligent, good-natured, energetic","Dental problems, eye issues, skin allergies",25,28,10,12
+Golden Retriever,Scotland,Gold,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",21,24,12,14
+Gordon Setter,Scotland,"Black, Tan",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",24,27,12,14
+Australian Cattle Dog,Australia,"Blue, Red",Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",17,20,12,14
+Greyhound,England,"White, Black, Red",Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",26,30,10,12
+Harrier,England,"Red, Black & Tan",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",18,21,12,14
+Irish Setter,Ireland,Red,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",26,28,12,14
+Irish Terrier,Ireland,Red,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",14,16,12,14
+Irish Water Spaniel,Ireland,Brown,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",21,24,12,14
+Irish Wolfhound,Ireland,"Grey, Red",Brown,"Loyal, intelligent, good-natured, energetic","Dental problems, eye issues, skin allergies",30,35,6,10
+Italian Greyhound,Italy,"Red, Black",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",13,15,12,15
+Jack Russell Terrier,England,"White, Black & Tan",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",10,12,12,15
+Japanese Chin,Japan,"Black, Red",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",7,11,12,15
+Keeshond,Netherlands,"Black, Cream",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",17,19,12,15
+Kerry Blue Terrier,Ireland,Blue,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",17,19,12,14
+Kuvasz,Hungary,White,Brown,"Loyal, intelligent, good-natured, energetic","Dental problems, eye issues, skin allergies",25,29,10,12
+Lhasa Apso,Tibet,"Black, White",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",10,11,12,15
+Maltese,Malta,White,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",8,10,12,15
+Miniature Pinscher,Germany,"Red, Stag Red",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",10,12,12,14
+Samoyed,Russia,White,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",21,23,12,14
+Shetland Sheepdog,Scotland,"Sable, Black",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",13,16,12,14
+Staffordshire Bull Terrier,England,"White, Black, Red",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",14,16,12,14
+Vizsla,Hungary,Red,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",20,24,12,14
+Anatolian Shepherd,Turkey,Fawn,Brown,"Loyal, intelligent, good-natured, energetic","Dental problems, eye issues, skin allergies",27,29,12,14
+Welsh Corgi,Wales,"Red, Sable",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",10,12,12,15
+Welsh Springer Spaniel,Wales,"Liver, White",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",20,25,12,14
+Welsh Terrier,Wales,"Black, Tan",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",10,12,12,15
+West Highland White Terrier,Scotland,White,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",10,12,12,15
+Whippet,England,"White, Black, Red",Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",18,22,12,15
+Wirehaired Pointing Griffon,Belgium,"Brown, White",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",21,24,12,14
+Xoloitzcuintli,Mexico,"Black, Red",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",10,14,12,15
+Yorkshire Terrier,England,Blue & Tan,Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",7,8,12,15
+Akita,Japan,"Red, Fawn, Sesame",Brown,"Loyal, intelligent, good-natured, energetic","Dental problems, eye issues, skin allergies",24,28,10,12
+Africanis,Africa,"Brown, Red",Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",22,25,12,15
+Basenji,Congo,"Red, Black & White",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",16,17,12,15
+Catahoula Leopard Dog,United States,"Merle, Black",Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",20,26,12,14
+Cocker Spaniel,England,"Black, Brown",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",14,15,12,15
+Miniature Shiba Inu,Japan,"Red, Sesame",Brown,"Intelligent, energetic, playful, good-natured","Dental problems, eye issues, skin allergies",13,16,12,15
+Belgian Tervuren,Belgium,Fawn,Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",22,26,12,14
+Pharaoh Hound,Malta,Red,Brown,"Intelligent, energetic, good-natured, loyal","Dental problems, eye issues, skin allergies",21,25,12,14

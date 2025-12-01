@@ -13,11 +13,11 @@ static pthread_cond_t pool_cond = PTHREAD_COND_INITIALIZER;
 // Helper: create a new PG connection
 static PGconn *db_new_conn_internal(void)
 {
-  const char *host = getenv("POSTGRES_HOST");
-  const char *dbName = getenv("POSTGRES_DB");
-  const char *user = getenv("POSTGRES_USER");
-  const char *pass = getenv("POSTGRES_PASSWORD");
-  const char *port = getenv("POSTGRES_PORT");
+  const char *host = getenv("DB_HOST");
+  const char *dbName = getenv("DB_NAME");
+  const char *user = getenv("DB_USER");
+  const char *pass = getenv("DB_PASSWORD");
+  const char *port = getenv("DB_PORT");
 
   if (!dbName || !user || !pass)
   {

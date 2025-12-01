@@ -56,7 +56,7 @@ dkms.conf
 
 .env
 
-build
+build/
 
 CMakeFiles/
 CMakeCache.txt
