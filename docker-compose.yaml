@@ -3,6 +3,7 @@ services:
     image: postgres:17
     container_name: postgres_db
     restart: unless-stopped
+    shm_size: "512mb"
 
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
@@ -16,8 +17,10 @@ services:
 
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d
-
+      - ./zarf/docker/postgres/init:/docker-entrypoint-initdb.d
+      - ./zarf/docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf
+    command: >
+      postgres -c config_file=/etc/postgresql/postgresql.conf
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
       interval: 5s
@@ -25,20 +28,44 @@ services:
       retries: 5
       start_period: 5s
 
-  c_server:
-    build:
-      context: .
-      dockerfile: zarf/docker/dogs-api.dockerfile
-    container_name: dogs_api
-    restart: no
-
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    ports:
+      - "6432:6432"
+    environment:
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_HOST: postgres
+      DB_NAME: postgres
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 2000
+      DEFAULT_POOL_SIZE: 20
+      MIN_POOL_SIZE: 5
+      LISTEN_PORT: 6432
+      AUTH_TYPE: plain
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "localhost", "-p", "6432"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     depends_on:
       postgres:
         condition: service_healthy
 
+  c_server:
+    build:
+      context: .
+      dockerfile: zarf/docker/backend/dogs-api.dockerfile
+    container_name: dogs_api
+    restart: unless-stopped
+
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+
     environment:
-      DB_HOST: postgres
-      DB_PORT: 5432
+      DB_HOST: pgbouncer
+      DB_PORT: 6432
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: ${DB_NAME:-appdb}
@@ -46,12 +73,12 @@ services:
     ports:
       - "${C_SERVER_PORT:-8080}:8080"
 
-    # healthcheck:
-    #   test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
-    #   interval: 5s
-    #   timeout: 2s
-    #   retries: 5
-    #   start_period: 5s
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/health"]
+      interval: 5s
+      timeout: 2s
+      retries: 5
+      start_period: 5s
 
 volumes:
   postgres_data:

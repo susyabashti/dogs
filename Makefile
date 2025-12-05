@@ -30,7 +30,11 @@ docker-down:
 	@echo "$(GREEN)Stopping Docker Compose services...$(NC)"
 	@docker compose -f $(DOCKER_COMPOSE) down
 
-docker-rebuild:
+docker-build:
+	@echo "$(GREEN)Rebuilding Docker Compose services...$(NC)"
+	@docker compose -f $(DOCKER_COMPOSE) build
+
+docker-build-clean:
 	@echo "$(GREEN)Rebuilding Docker Compose services...$(NC)"
 	@docker compose -f $(DOCKER_COMPOSE) build --no-cache
 

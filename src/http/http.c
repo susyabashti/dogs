@@ -1,4 +1,5 @@
 #include "civetweb.h"
+#include "logging/logging.h"
 
 static struct mg_context *ctx = NULL;
 
@@ -16,7 +17,7 @@ struct mg_context *http_server_start(const char *port)
 
   if (ctx == NULL)
   {
-    fprintf(stderr, "[http] Failed to start Civetweb server.\n");
+    log_msg(LOG_ERROR, "[HTTP] Failed to start CivetWeb server.");
     return NULL;
   }
 
@@ -27,11 +28,11 @@ void http_server_stop(void)
 {
   if (!ctx)
   {
-    fprintf(stderr, "[http] ctx is NULL, cannot stop server.");
+    log_msg(LOG_ERROR, "[HTTP] Expected a running server to stop, but got null pointer.");
     return;
   }
 
   mg_stop(ctx);
   mg_exit_library();
-  printf("Server stopped.\n");
+  log_msg(LOG_INFO, "[HTTP] Server stopped");
 }
