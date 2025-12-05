@@ -45,7 +45,7 @@ set_property(TARGET PostgreSQL::PostgreSQL APPEND PROPERTY
 # -------------------------------------------------
 add_library(civetweb_lib STATIC src/vendors/civetweb/civetweb.c)
 target_include_directories(civetweb_lib PUBLIC src/vendors/civetweb)
-target_compile_definitions(civetweb_lib PRIVATE NO_SSL NO_WEBSOCKET NO_FILES)
+target_compile_definitions(civetweb_lib PRIVATE NO_SSL)
 
 if(NOT MSVC)
     target_compile_options(civetweb_lib PRIVATE -w)
@@ -69,8 +69,10 @@ add_executable(dogs_api
     src/http/http.c
     src/http/router.c
     src/db/db.c
+    src/uuid/uuid.c
     src/logging/logging.c
-    src/db_health/db_health.c
+    src/services/dog_service/dog_service.c
+    src/services/db_health/db_health.c
     src/handlers/health_check.c
     src/handlers/get_dogs.c
 )

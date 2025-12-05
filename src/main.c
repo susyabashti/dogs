@@ -1,13 +1,16 @@
 #include "stdio.h"
+#include "unistd.h"
 #include "civetweb.h"
+#include "string.h"
+#include "time.h"
+#include "db/db.h"
 #include "http/http.h"
 #include "http/router.h"
-#include "db/db.h"
-#include "string.h"
-#include "db_health/db_health.h"
-#include "unistd.h"
+#include "services/db_health/db_health.h"
+#include "logging/logging.h"
 
 #define PORT "8080"
+#define DB_POOL_SIZE 32
 
 static int keep_running = 1;
 
@@ -19,9 +22,12 @@ void sigint_handler(int sig)
 
 int main(void)
 {
-  if (db_pool_init(5) != 0)
+  struct timespec start, end;
+  clock_gettime(CLOCK_MONOTONIC, &start);
+
+  if (db_pool_init(DB_POOL_SIZE) != 0)
   {
-    fprintf(stderr, "Failed to initialize DB pool\n");
+    log_msg(LOG_ERROR, "Failed to initialize DB pool");
     return 1;
   }
 
@@ -31,12 +37,19 @@ int main(void)
 
   if (!ctx)
   {
-    fprintf(stderr, "Failed to start Civetweb server.\n");
+    log_msg(LOG_ERROR, "Failed to start Civetweb server.");
     return 1;
   }
 
   register_routes(ctx);
-  printf("Server started on http://127.0.0.1:%s. Press Enter to stop...\n", PORT);
+
+  clock_gettime(CLOCK_MONOTONIC, &end);
+
+  long seconds = end.tv_sec - start.tv_sec;
+  long nanoseconds = end.tv_nsec - start.tv_nsec;
+  long microseconds = seconds * 1000000 + nanoseconds / 1000;
+
+  log_msg(LOG_INFO, "Server started on http://127.0.0.1:%s (startup time: %ld µs)", PORT, microseconds);
 
   while (keep_running)
   {

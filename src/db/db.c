@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
+#include "logging/logging.h"
 
 static PGconn **pool = NULL;
 static size_t pool_size = 0;
@@ -21,9 +22,11 @@ static PGconn *db_new_conn_internal(void)
 
   if (!dbName || !user || !pass)
   {
-    fprintf(stderr, "[DB] Missing environment variables\n");
+    log_msg(LOG_ERROR, "[DB] Missing environment variables.");
     return NULL;
   }
+  if (!host)
+    host = "localhost";
   if (!port)
     port = "5432";
 
@@ -33,14 +36,14 @@ static PGconn *db_new_conn_internal(void)
                       host, dbName, user, pass, port);
   if (n >= sizeof(conninfo))
   {
-    fprintf(stderr, "[DB] Connection string too long\n");
+    log_msg(LOG_ERROR, "[DB] Connection string too long");
     return NULL;
   }
 
   PGconn *conn = PQconnectdb(conninfo);
   if (PQstatus(conn) != CONNECTION_OK)
   {
-    fprintf(stderr, "[DB] Connection failed: %s\n", PQerrorMessage(conn));
+    log_msg(LOG_ERROR, "[DB] Connection failed: %s", PQerrorMessage(conn));
     PQfinish(conn);
     return NULL;
   }

@@ -3,19 +3,22 @@
 #include "cJSON.h"
 #include "stdlib.h"
 #include "time.h"
-#include "db_health/db_health.h"
+#include "services/db_health/db_health.h"
+
+#define SERVICE_NAME "dogs-api"
+#define VERSION "0.1.0"
 
 int health_handler(struct mg_connection *conn, void *ignored)
 {
   (void)ignored;
 
   time_t now = time(NULL);
-  const char *db_status = db_health_status();
+  DBStatus db_status = db_health_status();
 
   cJSON *json = cJSON_CreateObject();
-  cJSON_AddStringToObject(json, "app", "dogs_api");
-  cJSON_AddStringToObject(json, "version", "0.1.0");
-  cJSON_AddStringToObject(json, "db_status", db_status);
+  cJSON_AddStringToObject(json, "app", SERVICE_NAME);
+  cJSON_AddStringToObject(json, "version", VERSION);
+  cJSON_AddBoolToObject(json, "db_status", db_status == DB_STATUS_UP);
   cJSON_AddNumberToObject(json, "timestamp", (double)now);
 
   char *str = cJSON_PrintUnformatted(json);
