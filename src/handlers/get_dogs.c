@@ -5,7 +5,7 @@
 #include "stdlib.h"
 #include "logging/logging.h"
 #include "services/dog_service/dog_service.h"
-#include "uuid/uuid.h"
+#include "helpers/uuid/uuid.h"
 
 #define DEFAULT_LIMIT 10
 #define DEFAULT_LIMIT_STR "10"
@@ -163,13 +163,20 @@ int get_dog_by_id_handler(struct mg_connection *conn, const struct mg_request_in
   cJSON *json = dog_to_json(dog);
   dog_free(dog);
 
-  char *str = cJSON_PrintUnformatted(json);
-
-  mg_send_http_ok(conn, "application/json", strlen(str));
-  mg_write(conn, str, strlen(str));
-
-  cJSON_free(str);
+  char *json_str = cJSON_PrintUnformatted(json);
   cJSON_Delete(json);
+
+  if (!json_str)
+  {
+    mg_send_http_error(conn, 500, "Failed to serialize dog data.");
+    return 500;
+  }
+
+  size_t json_str_len = strlen(json_str);
+  mg_send_http_ok(conn, "application/json", json_str_len);
+  mg_write(conn, json_str, json_str_len);
+  free(json_str);
+
   return 200;
 }
 

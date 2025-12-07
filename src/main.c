@@ -7,6 +7,7 @@
 #include "http/http.h"
 #include "http/router.h"
 #include "services/db_health/db_health.h"
+#include "services/dog_service/dog_service.h"
 #include "logging/logging.h"
 
 #define PORT "8080"
@@ -24,6 +25,8 @@ int main(void)
 {
   struct timespec start, end;
   clock_gettime(CLOCK_MONOTONIC, &start);
+
+  register_dog_service_prepared_statements();
 
   if (db_pool_init(DB_POOL_SIZE) != 0)
   {

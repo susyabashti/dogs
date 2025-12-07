@@ -7,6 +7,9 @@
 // Returns 0 on success, non-zero on failure.
 int db_pool_init(size_t size);
 
+// Register a prepared statement BEFORE pool init
+int db_register_prepared(const char *name, const char *sql);
+
 // Get a connection from the pool (blocking if none available).
 PGconn *db_pool_acquire(void);
 

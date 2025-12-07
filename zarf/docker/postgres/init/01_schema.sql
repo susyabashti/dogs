@@ -11,5 +11,8 @@ CREATE TABLE IF NOT EXISTS dogs (
   min_longevity INT NOT NULL,
   max_longevity INT NOT NULL,
   character_traits TEXT NOT NULL,
-  common_health_problems TEXT NOT NULL
+  common_health_problems TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE INDEX idx_dogs_created_at ON dogs(created_at);

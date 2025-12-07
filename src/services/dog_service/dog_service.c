@@ -1,9 +1,11 @@
-#include "db/db.h"
 #include "logging/logging.h"
 #include "cJSON.h"
 #include "stdlib.h"
 #include "string.h"
 #include "dog_service.h"
+#include "db/db.h"
+#include "time.h"
+#include "helpers/time_utils/time_utils.h"
 
 Dog *dog_new(const char *id,
              const char *breed,
@@ -15,7 +17,8 @@ Dog *dog_new(const char *id,
              int min_longevity,
              int max_longevity,
              const char *character_traits,
-             const char *common_health_problems)
+             const char *common_health_problems,
+             time_t created_at)
 {
   Dog *d = malloc(sizeof(Dog));
 
@@ -30,6 +33,7 @@ Dog *dog_new(const char *id,
   d->max_height = max_height;
   d->min_longevity = min_longevity;
   d->max_longevity = max_longevity;
+  d->created_at = created_at;
 
   return d;
 }
@@ -52,6 +56,11 @@ void dog_free(Dog *d)
 
 Dog *dog_from_pg_result(PGresult *result, int row_num)
 {
+  const char *creadet_at_str = PQgetvalue(result, row_num, 11);
+  struct tm tm;
+  strptime(creadet_at_str, "%Y-%m-%d %H:%M:%S", &tm);
+  time_t created_at = portable_timegm(&tm);
+
   return dog_new(
       PQgetvalue(result, row_num, 0),
       PQgetvalue(result, row_num, 1),
@@ -63,7 +72,8 @@ Dog *dog_from_pg_result(PGresult *result, int row_num)
       atoi(PQgetvalue(result, row_num, 7)),
       atoi(PQgetvalue(result, row_num, 8)),
       PQgetvalue(result, row_num, 9),
-      PQgetvalue(result, row_num, 10));
+      PQgetvalue(result, row_num, 10),
+      created_at);
 }
 
 cJSON *dog_to_json(Dog *dog)
@@ -81,7 +91,19 @@ cJSON *dog_to_json(Dog *dog)
   cJSON_AddStringToObject(json, "character_traits", dog->character_traits);
   cJSON_AddStringToObject(json, "common_health_problems", dog->common_health_problems);
 
+  char buf[32];
+  struct tm tm;
+  gmtime_r(&dog->created_at, &tm);
+  strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &tm);
+  cJSON_AddStringToObject(json, "created_at", buf);
+
   return json;
+}
+
+void register_dog_service_prepared_statements(void)
+{
+  db_register_prepared("get_dogs_by_query", "SELECT * FROM dogs WHERE id > $1 ORDER BY id ASC LIMIT $2");
+  db_register_prepared("get_dog_by_id", "SELECT * FROM dogs WHERE id = $1");
 }
 
 GetDogsByQueryStatus get_dogs_by_query(PGconn *db_conn, const char *cursor, int limit, Dog ***out_dogs)
@@ -96,7 +118,7 @@ GetDogsByQueryStatus get_dogs_by_query(PGconn *db_conn, const char *cursor, int 
   paramValues[0] = cursor;
   paramValues[1] = limit_str;
 
-  PGresult *result = PQexecParams(db_conn, "SELECT * FROM dogs WHERE id > $1 ORDER BY id ASC LIMIT $2", 2, NULL, paramValues, NULL, NULL, 0);
+  PGresult *result = PQexecPrepared(db_conn, "get_dogs_by_query", 2, paramValues, NULL, NULL, 0);
   if (PQresultStatus(result) != PGRES_TUPLES_OK)
   {
     log_msg(LOG_ERROR, "DB query failed for cursor=%s: %s", cursor, PQerrorMessage(db_conn));
@@ -133,7 +155,7 @@ GetDogStatus get_dog_by_id(PGconn *db_conn, const char *dog_id, Dog **out_dog)
   const char *paramValues[1];
   paramValues[0] = dog_id;
 
-  PGresult *result = PQexecParams(db_conn, "SELECT * FROM dogs WHERE id = $1", 1, NULL, paramValues, NULL, NULL, 0);
+  PGresult *result = PQexecPrepared(db_conn, "get_dog_by_id", 1, paramValues, NULL, NULL, 0);
 
   if (PQresultStatus(result) != PGRES_TUPLES_OK)
   {

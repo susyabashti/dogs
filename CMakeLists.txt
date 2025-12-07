@@ -69,7 +69,8 @@ add_executable(dogs_api
     src/http/http.c
     src/http/router.c
     src/db/db.c
-    src/uuid/uuid.c
+    src/helpers/uuid/uuid.c
+    src/helpers/time_utils/time_utils.c
     src/logging/logging.c
     src/services/dog_service/dog_service.c
     src/services/db_health/db_health.c
@@ -81,6 +82,9 @@ target_include_directories(dogs_api PRIVATE
     src
     include
 )
+
+# Enable strptime, gmtime_r, and POSIX/XSI extensions
+target_compile_definitions(dogs_api PRIVATE _XOPEN_SOURCE=700)
 
 target_link_libraries(dogs_api PRIVATE
     civetweb_lib

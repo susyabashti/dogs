@@ -16,6 +16,7 @@ typedef struct
   int max_height;
   int min_longevity;
   int max_longevity;
+  time_t created_at;
 } Dog;
 
 Dog *dog_new(const char *id,
@@ -28,9 +29,12 @@ Dog *dog_new(const char *id,
              int min_longevity,
              int max_longevity,
              const char *character_traits,
-             const char *common_health_problems);
+             const char *common_health_problems,
+             time_t created_at);
 
 void dog_free(Dog *d);
+
+void register_dog_service_prepared_statements(void);
 
 cJSON *dog_to_json(Dog *dog);
 
