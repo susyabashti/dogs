@@ -1,0 +1,28 @@
+{
+  "version": 1,
+  "services": {
+    "postgres": {
+      "image": "docker.io/library/postgres:17",
+      "env": {
+        "POSTGRES_USER": "postgres",
+        "POSTGRES_PASSWORD": "dev",
+        "POSTGRES_DB": "postgres"
+      },
+      "healthcheck": {
+        "command": ["pg_isready", "-U", "postgres", "-d", "postgres"],
+        "interval": "2s",
+        "timeout": "5s",
+        "retries": 30
+      }
+    }
+  },
+  "env": {
+    "DB_HOST": "postgres",
+    "DB_PORT": "5432",
+    "DB_USER": "postgres",
+    "DB_PASSWORD": "dev",
+    "DB_NAME": "postgres"
+  },
+  "setup": "env-setup.sh",
+  "caches": ["/home/legion/.cache"]
+}

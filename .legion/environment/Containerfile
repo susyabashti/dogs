@@ -1,0 +1,33 @@
+# Development environment for the Dogs API service.
+# Toolchains and system packages only — no project source, no project dependencies.
+#
+# The project (CMakeLists.txt) requires:
+#   - a C11 compiler (gcc) with make
+#   - CMake >= 3.15
+#   - PostgreSQL client development files (find_package(PostgreSQL) / libpq)
+#   - git, curl (used by setup/test scripts)
+#
+# vcpkg is intentionally NOT used: CMakeLists.txt treats it as optional
+# ("Optional vcpkg integration") and apt's libpq-dev satisfies
+# find_package(PostgreSQL REQUIRED) directly.
+
+FROM docker.io/library/debian:12-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        build-essential \
+        cmake \
+        make \
+        git \
+        curl \
+        ca-certificates \
+        pkg-config \
+        libpq-dev \
+        postgresql-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Environment helper scripts (dependency fetch + DB migration, smoke test)
+COPY env-setup.sh /usr/local/bin/env-setup.sh
+COPY env-test.sh /usr/local/bin/env-test.sh
+RUN chmod +x /usr/local/bin/env-setup.sh /usr/local/bin/env-test.sh
