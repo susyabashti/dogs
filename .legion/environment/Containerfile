@@ -7,6 +7,12 @@
 #   - PostgreSQL client development files (find_package(PostgreSQL) / libpq)
 #   - git, curl (used by setup/test scripts)
 #
+# Quality-gate tooling (for the upcoming lint/format/sanitizer/test/CI work):
+#   - clang-format, clang-tidy, cppcheck, shellcheck, yamllint (apt packages)
+#   - libcmocka-dev (C unit-test framework)
+#   - hadolint (pinned static binary from the official GitHub release;
+#     hadolint is not packaged in Debian)
+#
 # vcpkg is intentionally NOT used: CMakeLists.txt treats it as optional
 # ("Optional vcpkg integration") and apt's libpq-dev satisfies
 # find_package(PostgreSQL REQUIRED) directly.
@@ -25,7 +31,50 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         pkg-config \
         libpq-dev \
         postgresql-client \
+        clang-format \
+        clang-tidy \
+        cppcheck \
+        libcmocka-dev \
+        shellcheck \
+        yamllint \
     && rm -rf /var/lib/apt/lists/*
+
+# hadolint: pinned official static binary (not in Debian apt), checksum-verified.
+# The asset is selected per build architecture (amd64/arm64).
+ARG HADOLINT_VERSION=v2.15.1
+RUN set -eux; \
+    arch="$(dpkg --print-architecture)"; \
+    case "$arch" in \
+        amd64) asset=hadolint-linux-x86_64; sha=c7187db94eeeeca956519a6af171adc31453941a1e777961f6e680f697c8c507 ;; \
+        arm64) asset=hadolint-linux-arm64;  sha=f6198ef8090f404dbb771abfee086eb8c48ac177f30da7fd3510aca35b344b5d ;; \
+        *) echo "unsupported architecture for hadolint: $arch" >&2; exit 1 ;; \
+    esac; \
+    curl -fsSL "https://github.com/hadolint/hadolint/releases/download/${HADOLINT_VERSION}/${asset}" -o /tmp/hadolint; \
+    echo "${sha}  /tmp/hadolint" | sha256sum -c -; \
+    install -m 0755 /tmp/hadolint /usr/local/bin/hadolint; \
+    rm -f /tmp/hadolint; \
+    hadolint --version
+
+# Build-time sanity check: a trivial cmocka test must compile, link, and pass.
+RUN set -eux; \
+    printf '%s\n' \
+        '#include <stdarg.h>' \
+        '#include <stddef.h>' \
+        '#include <setjmp.h>' \
+        '#include <cmocka.h>' \
+        '' \
+        'static void test_trivial(void **state)' \
+        '{ (void)state; assert_int_equal(1 + 1, 2); }' \
+        '' \
+        'int main(void)' \
+        '{' \
+        '    const struct CMUnitTest tests[] = { cmocka_unit_test(test_trivial) };' \
+        '    return cmocka_run_group_tests(tests, NULL, NULL);' \
+        '}' \
+        > /tmp/cmocka_check.c; \
+    gcc -std=c11 -Wall -Wextra -Werror /tmp/cmocka_check.c -o /tmp/cmocka_check -lcmocka; \
+    /tmp/cmocka_check; \
+    rm -f /tmp/cmocka_check.c /tmp/cmocka_check
 
 # Environment helper scripts (dependency fetch + DB migration, smoke test)
 COPY env-setup.sh /usr/local/bin/env-setup.sh

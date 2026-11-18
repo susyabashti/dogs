@@ -5,7 +5,13 @@
     "cmake --version",
     "make --version",
     "git --version",
-    "psql --version"
+    "psql --version",
+    "clang-format --version",
+    "clang-tidy --version",
+    "cppcheck --version",
+    "shellcheck --version",
+    "hadolint --version",
+    "yamllint --version"
   ],
   "build": "cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel",
   "test": "env-test.sh"
