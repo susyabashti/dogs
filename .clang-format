@@ -1,0 +1,28 @@
+# dogs-api code style
+# 2-space indent, Allman braces, 4-space continuation indent.
+# Vendored code (src/vendors/) is never formatted: the Makefile targets
+# build their file lists without it.
+BasedOnStyle: LLVM
+IndentWidth: 2
+ContinuationIndentWidth: 4
+# Align continuation lines to the open bracket when the first argument shares
+# the opening line (e.g. `PQprepare(conn,`), and to ContinuationIndentWidth
+# otherwise (e.g. `log_msg(` on its own line). Set explicitly: it matches the
+# codebase and is the LLVM default, but we do not want to drift if a
+# clang-format version changes the default.
+AlignAfterOpenBracket: Align
+ColumnLimit: 110
+SortIncludes: false
+PointerAlignment: Right
+AllowShortFunctionsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+BinPackParameters: false
+BinPackArguments: false
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: Always
+  AfterFunction: true
+  AfterStruct: true
+  AfterUnion: true
+  AfterEnum: true
+  BeforeElse: true

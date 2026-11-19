@@ -43,8 +43,8 @@ static int db_prepare_statements(PGconn *conn)
                               NULL);
     if (PQresultStatus(res) != PGRES_COMMAND_OK)
     {
-      log_msg(LOG_ERROR, "[DB] Failed to prepare statement %s: %s",
-              prepared_stmts[i].name, PQerrorMessage(conn));
+      log_msg(
+          LOG_ERROR, "[DB] Failed to prepare statement %s: %s", prepared_stmts[i].name, PQerrorMessage(conn));
       PQclear(res);
       return -1;
     }
@@ -72,9 +72,14 @@ static PGconn *db_new_conn_internal(void)
     port = "5432";
 
   char conninfo[256];
-  snprintf(conninfo, sizeof(conninfo),
+  snprintf(conninfo,
+           sizeof(conninfo),
            "host=%s dbname=%s user=%s password=%s port=%s",
-           host, dbName, user, pass, port);
+           host,
+           dbName,
+           user,
+           pass,
+           port);
 
   PGconn *conn = PQconnectdb(conninfo);
   if (PQstatus(conn) != CONNECTION_OK)

@@ -66,7 +66,7 @@ typedef enum
 {
   GET_DOG_OK = 0,
   GET_DOG_NOT_FOUND,
-  GET_DOG_ERROR,
+  GET_DOG_ERROR
 } GetDogStatus;
 
 GetDogStatus get_dog_by_id(PGconn *db_conn, const char *dog_id, Dog **dog_out);

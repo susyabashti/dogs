@@ -62,19 +62,18 @@ Dog *dog_from_pg_result(PGresult *result, int row_num)
   strptime(creadet_at_str, "%Y-%m-%d %H:%M:%S", &tm);
   time_t created_at = portable_timegm(&tm);
 
-  return dog_new(
-      PQgetvalue(result, row_num, 0),
-      PQgetvalue(result, row_num, 1),
-      PQgetvalue(result, row_num, 2),
-      PQgetvalue(result, row_num, 3),
-      PQgetvalue(result, row_num, 4),
-      atoi(PQgetvalue(result, row_num, 5)),
-      atoi(PQgetvalue(result, row_num, 6)),
-      atoi(PQgetvalue(result, row_num, 7)),
-      atoi(PQgetvalue(result, row_num, 8)),
-      PQgetvalue(result, row_num, 9),
-      PQgetvalue(result, row_num, 10),
-      created_at);
+  return dog_new(PQgetvalue(result, row_num, 0),
+                 PQgetvalue(result, row_num, 1),
+                 PQgetvalue(result, row_num, 2),
+                 PQgetvalue(result, row_num, 3),
+                 PQgetvalue(result, row_num, 4),
+                 atoi(PQgetvalue(result, row_num, 5)),
+                 atoi(PQgetvalue(result, row_num, 6)),
+                 atoi(PQgetvalue(result, row_num, 7)),
+                 atoi(PQgetvalue(result, row_num, 8)),
+                 PQgetvalue(result, row_num, 9),
+                 PQgetvalue(result, row_num, 10),
+                 created_at);
 }
 
 cJSON *dog_to_json(Dog *dog)

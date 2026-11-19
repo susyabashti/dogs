@@ -7,11 +7,7 @@ struct mg_context *http_server_start(const char *port)
 {
   mg_init_library(0);
 
-  const char *options[] = {
-      "listening_ports",
-      port,
-      NULL,
-  };
+  const char *options[] = {"listening_ports", port, NULL};
 
   ctx = mg_start(NULL, NULL, options);
 
