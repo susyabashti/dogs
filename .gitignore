@@ -57,6 +57,7 @@ dkms.conf
 .env
 
 build/
+build-sanitize/
 
 CMakeFiles/
 CMakeCache.txt

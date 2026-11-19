@@ -2,6 +2,11 @@
 
 #include "db/db.h"
 #include "cJSON.h"
+#include <stddef.h>
+
+// Pagination limits for /api/dogs
+#define DOGS_DEFAULT_LIMIT 10
+#define DOGS_MAX_LIMIT 25
 
 typedef struct
 {
@@ -37,6 +42,16 @@ void dog_free(Dog *d);
 void register_dog_service_prepared_statements(void);
 
 cJSON *dog_to_json(Dog *dog);
+
+// Resolve the effective page size from a raw 'limit' query parameter.
+// NULL/empty/non-positive/invalid input falls back to DOGS_DEFAULT_LIMIT;
+// values above DOGS_MAX_LIMIT are capped at DOGS_MAX_LIMIT.
+int dog_service_resolve_limit(const char *limit_str);
+
+// Build the /api/dogs list response object: { data: [...], count: N, next_cursor: "..." }.
+// Consumes the NULL-terminated dog list (frees every Dog and the array itself).
+// Pass NULL for an empty page. *out_count (optional) receives the number of dogs.
+cJSON *dog_service_build_list_response(Dog **dogs, size_t *out_count);
 
 typedef enum
 {

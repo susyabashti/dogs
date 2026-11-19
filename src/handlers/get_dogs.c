@@ -7,9 +7,6 @@
 #include "services/dog_service/dog_service.h"
 #include "helpers/uuid/uuid.h"
 
-#define DEFAULT_LIMIT 10
-#define DEFAULT_LIMIT_STR "10"
-#define MAX_PER_REQUEST 25
 #define DEFAULT_CURSOR_STR "00000000-0000-0000-0000-000000000000"
 
 int get_all_dogs_handler(struct mg_connection *conn, const struct mg_request_info *request)
@@ -21,7 +18,7 @@ int get_all_dogs_handler(struct mg_connection *conn, const struct mg_request_inf
     query_string_len = strlen(query_string);
   }
 
-  int limit = DEFAULT_LIMIT;
+  int limit = DOGS_DEFAULT_LIMIT;
   char *next_cursor = DEFAULT_CURSOR_STR;
 
   if (query_string)
@@ -47,12 +44,7 @@ int get_all_dogs_handler(struct mg_connection *conn, const struct mg_request_inf
 
     if (strlen(limit_str) > 0)
     {
-      limit = atoi(limit_str);
-
-      if (limit <= 0)
-        limit = DEFAULT_LIMIT;
-      else if (limit > MAX_PER_REQUEST)
-        limit = MAX_PER_REQUEST;
+      limit = dog_service_resolve_limit(limit_str);
     }
   }
 
@@ -74,39 +66,16 @@ int get_all_dogs_handler(struct mg_connection *conn, const struct mg_request_inf
     return 500;
   }
 
-  cJSON *json = cJSON_CreateObject();
-  cJSON *array = cJSON_CreateArray();
-
   size_t count = 0;
-  char next_cursor_result[37] = "";
-  char *last_id = NULL;
-
-  if (status != GET_DOGS_BY_QUERY_EMPTY)
-  {
-    for (int i = 0; dogs[i] != NULL; i++)
-    {
-      cJSON *dog_json = dog_to_json(dogs[i]);
-      cJSON_AddItemToArray(array, dog_json);
-      count++;
-
-      last_id = strdup(dogs[i]->id);
-      dog_free(dogs[i]); // <-- we free the dog item from memory
-    }
-
-    free(dogs); // <-- we free the dogs array from memory
-
-    if (last_id)
-    {
-      snprintf(next_cursor_result, sizeof(next_cursor_result), "%s", last_id);
-      free(last_id); // free the copy
-    }
-  }
-
-  cJSON_AddItemToObject(json, "data", array);
-  cJSON_AddNumberToObject(json, "count", count);
-  cJSON_AddStringToObject(json, "next_cursor", next_cursor_result);
+  cJSON *json = dog_service_build_list_response(dogs, &count);
 
   char *str = cJSON_PrintUnformatted(json);
+  if (!str)
+  {
+    cJSON_Delete(json);
+    mg_send_http_error(conn, 500, "Failed to serialize dog data.");
+    return 500;
+  }
 
   mg_send_http_ok(conn, "application/json", strlen(str));
   mg_write(conn, str, strlen(str));

@@ -2,6 +2,7 @@
 #include "cJSON.h"
 #include "stdlib.h"
 #include "string.h"
+#include "errno.h"
 #include "dog_service.h"
 #include "db/db.h"
 #include "time.h"
@@ -96,6 +97,61 @@ cJSON *dog_to_json(Dog *dog)
   gmtime_r(&dog->created_at, &tm);
   strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &tm);
   cJSON_AddStringToObject(json, "created_at", buf);
+
+  return json;
+}
+
+int dog_service_resolve_limit(const char *limit_str)
+{
+  if (!limit_str || strlen(limit_str) == 0)
+    return DOGS_DEFAULT_LIMIT;
+
+  // strtol (not atoi) so out-of-range input is detected instead of
+  // invoking undefined behavior on overflow.
+  errno = 0;
+  char *end = NULL;
+  long limit = strtol(limit_str, &end, 10);
+
+  if (end == limit_str || *end != '\0' || errno == ERANGE)
+    return DOGS_DEFAULT_LIMIT;
+
+  if (limit <= 0)
+    return DOGS_DEFAULT_LIMIT;
+  if (limit > DOGS_MAX_LIMIT)
+    return DOGS_MAX_LIMIT;
+
+  return (int)limit;
+}
+
+cJSON *dog_service_build_list_response(Dog **dogs, size_t *out_count)
+{
+  cJSON *json = cJSON_CreateObject();
+  cJSON *array = cJSON_CreateArray();
+
+  size_t count = 0;
+  char next_cursor[37] = "";
+
+  if (dogs)
+  {
+    for (int i = 0; dogs[i] != NULL; i++)
+    {
+      cJSON *dog_json = dog_to_json(dogs[i]);
+      cJSON_AddItemToArray(array, dog_json);
+      count++;
+
+      // Copy the id before the dog is freed; the last row wins.
+      snprintf(next_cursor, sizeof(next_cursor), "%s", dogs[i]->id);
+      dog_free(dogs[i]);
+    }
+    free(dogs);
+  }
+
+  cJSON_AddItemToObject(json, "data", array);
+  cJSON_AddNumberToObject(json, "count", count);
+  cJSON_AddStringToObject(json, "next_cursor", next_cursor);
+
+  if (out_count)
+    *out_count = count;
 
   return json;
 }

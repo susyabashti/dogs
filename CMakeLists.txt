@@ -28,6 +28,16 @@ else()
 endif()
 
 # -------------------------------------------------
+# Sanitize build type (ASan + UBSan)
+# -------------------------------------------------
+if(CMAKE_BUILD_TYPE STREQUAL "Sanitize")
+    if(NOT MSVC)
+        add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=address,undefined)
+    endif()
+endif()
+
+# -------------------------------------------------
 # Find PostgreSQL
 # -------------------------------------------------
 find_package(PostgreSQL REQUIRED)
@@ -97,3 +107,45 @@ target_link_libraries(dogs_api PRIVATE
 if(NOT MSVC)
     target_compile_options(dogs_api PRIVATE -Wno-newline-eof)
 endif()
+
+# -------------------------------------------------
+# Unit tests (cmocka + CTest)
+# -------------------------------------------------
+enable_testing()
+
+# cmocka ships no CMake package config in this environment (libcmocka-dev
+# only provides cmocka.h, libcmocka.{a,so} and cmocka.pc), so discover it
+# via pkg-config.
+find_package(PkgConfig REQUIRED)
+pkg_check_modules(CMOCKA REQUIRED cmocka)
+
+add_executable(dogs_api_tests
+    tests/test_dogs_api.c
+    src/helpers/uuid/uuid.c
+    src/helpers/time_utils/time_utils.c
+    src/services/dog_service/dog_service.c
+    src/db/db.c
+    src/logging/logging.c
+)
+
+target_include_directories(dogs_api_tests PRIVATE
+    src
+    include
+    ${CMOCKA_INCLUDE_DIRS}
+)
+
+# Enable strptime, gmtime_r, and POSIX/XSI extensions
+target_compile_definitions(dogs_api_tests PRIVATE _XOPEN_SOURCE=700)
+
+if(CMOCKA_LIBRARY_DIRS)
+    link_directories(${CMOCKA_LIBRARY_DIRS})
+endif()
+
+target_link_libraries(dogs_api_tests PRIVATE
+    cjson
+    PostgreSQL::PostgreSQL
+    ${CMOCKA_LIBRARIES}
+    pthread
+)
+
+add_test(NAME dogs_api_tests COMMAND dogs_api_tests)
