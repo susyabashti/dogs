@@ -1,7 +1,10 @@
 #!/bin/sh
-# Smoke test for the Dogs API (the project has no unit-test suite; its own
-# verification is the docker-compose healthcheck: curl -f /api/health).
-# Starts the built server against the dev postgres and exercises the API.
+# Verification for the Dogs API:
+#  1. cmocka unit-test suite (tests/test_dogs_api.c, built as dogs_api_tests,
+#     registered with CTest in CMakeLists.txt).
+#  2. Smoke test: starts the built server against the dev postgres and
+#     exercises the API (the project's own compose healthcheck pattern:
+#     curl -f /api/health).
 set -eu
 
 # --- locate the repository root -------------------------------------------
@@ -22,6 +25,10 @@ if [ ! -x build/dogs_api ]; then
   echo "ERROR: build/dogs_api not found — run the build step first." >&2
   exit 1
 fi
+
+# --- unit tests (cmocka / CTest) --------------------------------------------
+echo "==> Running unit tests (ctest)"
+ctest --test-dir build --output-on-failure
 
 export DB_HOST="${DB_HOST:-postgres}"
 export DB_PORT="${DB_PORT:-5432}"
