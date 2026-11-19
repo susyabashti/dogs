@@ -28,12 +28,21 @@ else()
 endif()
 
 # -------------------------------------------------
-# Sanitize build type (ASan + UBSan)
+# Sanitize build types (ASan + UBSan / TSan)
 # -------------------------------------------------
+# Directory-scoped flags, so every target in this build (including the
+# vendored civetweb/cJSON static libs) is compiled and linked with the
+# sanitizer. Vendored targets keep their -w warning suppression.
+# ASan and TSan are mutually exclusive, hence two separate build types.
 if(CMAKE_BUILD_TYPE STREQUAL "Sanitize")
     if(NOT MSVC)
         add_compile_options(-fsanitize=address,undefined -fno-omit-frame-pointer)
         add_link_options(-fsanitize=address,undefined)
+    endif()
+elseif(CMAKE_BUILD_TYPE STREQUAL "SanitizeTSan")
+    if(NOT MSVC)
+        add_compile_options(-fsanitize=thread -fno-omit-frame-pointer)
+        add_link_options(-fsanitize=thread)
     endif()
 endif()
 
