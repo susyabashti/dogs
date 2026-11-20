@@ -13,7 +13,8 @@ NC    := \033[0m
 # =========================================================
 # Phony targets
 # =========================================================
-.PHONY: docker-up docker-down docker-logs docker-rebuild docker-enter format format-check format-guard lint lint-cppcheck lint-guard
+.PHONY: docker-up docker-down docker-logs docker-rebuild docker-enter format format-check format-guard lint lint-cppcheck lint-guard \
+        lint-shell lint-docker lint-yaml lint-all lint-shell-guard lint-docker-guard lint-yaml-guard
 
 # clang-format
 CLANG_FORMAT := clang-format
@@ -126,3 +127,80 @@ lint-cppcheck: lint-guard
 	  --suppress=ConfigurationNotChecked:src/vendors/civetweb/civetweb.h \
 	  --error-exitcode=1 src/
 	@echo "$(GREEN)cppcheck: clean$(NC)"
+
+# ---------------------------------------------------------
+# Non-C artifact linting (shellcheck, hadolint, yamllint)
+# ---------------------------------------------------------
+
+SHELLCHECK := shellcheck
+HADOLINT   := hadolint
+YAMLLINT   := yamllint
+
+# All shell scripts in the repo (env-* included), excluding build trees and vendored code.
+SHELL_FILES := $(shell find . -name '*.sh' -not -path './.git/*' -not -path './build*' -not -path './src/vendors/*')
+
+# Project Dockerfiles (zarf delivery tree; case-insensitive, matches Dockerfile and *.dockerfile).
+DOCKERFILES := $(shell find . -type f -iname '*dockerfile*' -not -path './.git/*' -not -path './build*')
+
+# The environment-managed Containerfile: protected file (not editable in-repo).
+ENV_CONTAINERFILE := .legion/environment/Containerfile
+
+# All YAML files at/under the repo root, excluding build trees.
+YAML_FILES := $(shell find . -type f \( -name '*.yml' -o -name '*.yaml' \) -not -path './.git/*' -not -path './build*')
+
+lint-shell-guard:
+	@if [ -z "$(SHELL_FILES)" ]; then \
+	  echo "error: no shell scripts found - run make from the repository root" >&2; \
+	  exit 1; \
+	fi
+	@command -v $(SHELLCHECK) >/dev/null 2>&1 || { echo "error: shellcheck not found in PATH (install it, e.g. 'apt install shellcheck')" >&2; exit 1; }
+
+lint-shell: lint-shell-guard
+	@echo "$(GREEN)Linting shell scripts (shellcheck)...$(NC)"
+	@for f in $(SHELL_FILES); do \
+	  echo "[shellcheck] $$f"; \
+	  $(SHELLCHECK) "$$f" || exit 1; \
+	done
+	@echo "$(GREEN)shellcheck: clean$(NC)"
+
+lint-docker-guard:
+	@if [ -z "$(DOCKERFILES)" ]; then \
+	  echo "error: no Dockerfiles found - run make from the repository root" >&2; \
+	  exit 1; \
+	fi
+	@command -v $(HADOLINT) >/dev/null 2>&1 || { echo "error: hadolint not found in PATH (static binary; see .legion/environment/Containerfile for the pinned install)" >&2; exit 1; }
+
+# lint-docker notes:
+#  .legion/environment/Containerfile is a protected, environment-managed file,
+#  so its two known findings are suppressed on the command line (with reasons) \
+#  instead of via inline pragmas:
+#    DL3008  apt versions not pinned - Debian package versions differ by release/arch;
+#            the base image tag pins the release instead
+#    DL4006  pipefail - the only pipe in the file is `echo <const> | sha256sum -c`;
+#            the left-hand side is a constant and cannot meaningfully fail
+lint-docker: lint-docker-guard
+	@echo "$(GREEN)Linting Dockerfiles (hadolint)...$(NC)"
+	@for f in $(DOCKERFILES); do \
+	  echo "[hadolint] $$f"; \
+	  $(HADOLINT) "$$f" || exit 1; \
+	done
+	@if [ -f "$(ENV_CONTAINERFILE)" ]; then \
+	  echo "[hadolint] $(ENV_CONTAINERFILE)"; \
+	  $(HADOLINT) --ignore=DL3008 --ignore=DL4006 "$(ENV_CONTAINERFILE)" || exit 1; \
+	fi
+	@echo "$(GREEN)hadolint: clean$(NC)"
+
+lint-yaml-guard:
+	@if [ -z "$(YAML_FILES)" ]; then \
+	  echo "error: no YAML files found - run make from the repository root" >&2; \
+	  exit 1; \
+	fi
+	@command -v $(YAMLLINT) >/dev/null 2>&1 || { echo "error: yamllint not found in PATH (install it, e.g. 'apt install yamllint')" >&2; exit 1; }
+
+lint-yaml: lint-yaml-guard
+	@echo "$(GREEN)Linting YAML (yamllint, config in .yamllint)...$(NC)"
+	@$(YAMLLINT) -c .yamllint $(YAML_FILES)
+	@echo "$(GREEN)yamllint: clean$(NC)"
+
+# All non-C linters in one command.
+lint-all: lint-shell lint-docker lint-yaml

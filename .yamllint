@@ -1,0 +1,12 @@
+---
+# yamllint configuration for project YAML (docker-compose.yaml & co).
+# Starts from the default preset; only two rules are adjusted:
+#  - line-length: relaxed to 120 characters
+#  - truthy: kept as a warning (not an error)
+extends: default
+
+rules:
+  line-length:
+    max: 120
+  truthy:
+    level: warning
