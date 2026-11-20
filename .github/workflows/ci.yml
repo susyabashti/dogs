@@ -1,0 +1,443 @@
+---
+# CI pipeline for the Dogs API service.
+#
+# Mirrors the local quality gates one-to-one (each job maps to an existing,
+# locally passing target/recipe):
+#   build           -> cmake -B build -DCMAKE_BUILD_TYPE=Release/Debug + cmake --build
+#   format          -> make format-check
+#   lint            -> make lint (clang-tidy) + make lint-cppcheck (cppcheck)
+#   lint-artifacts  -> make lint-all (shellcheck + hadolint + yamllint)
+#   test            -> cmake -DCMAKE_BUILD_TYPE=Sanitize + ctest (ASan/UBSan)
+#   tsan            -> cmake -DCMAKE_BUILD_TYPE=SanitizeTSan + tests + smoke run
+#   integration     -> postgres:17 service + zarf/docker/postgres/init schema+seed
+#                      + API smoke checks (curl -f /api/health, /api/dogs?limit=2)
+#
+# All jobs are independent and run in parallel; any step failure fails the
+# pipeline (non-zero exit of every run step).
+#
+# Runner: ubuntu-22.04 on purpose. Its apt toolchain (clang-format/clang-tidy
+# 14, cppcheck 2.10, gcc 11) matches the development environment
+# (.legion/environment/Containerfile, Debian 12), so local and CI gates use
+# the same linter/formatter versions.
+#
+# Dependencies: vcpkg is optional for this project (CMakeLists.txt only
+# activates it when VCPKG_ROOT is set) and the dev environment intentionally
+# uses system packages; CI mirrors that with apt + actions/cache. If vcpkg
+# is adopted, cache vcpkg_installed/ with actions/cache keyed on vcpkg.json.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ------------------------------------------------------------------
+  # 1. build - Release + Debug (verify.json "build" recipe)
+  # ------------------------------------------------------------------
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-apt-${{ hashFiles('.legion/environment/Containerfile', '.github/workflows/ci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake make git curl ca-certificates \
+            pkg-config libpq-dev postgresql-client libcmocka-dev
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Build (Release)
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel
+
+      - name: Build (Debug)
+        run: cmake -B build-debug -DCMAKE_BUILD_TYPE=Debug && cmake --build build-debug --parallel
+
+  # ------------------------------------------------------------------
+  # 2. format - clang-format check (Makefile: format-check)
+  # ------------------------------------------------------------------
+  format:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-apt-${{ hashFiles('.legion/environment/Containerfile', '.github/workflows/ci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install clang-format
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends clang-format
+          rm -rf /var/lib/apt/lists/*
+
+      - name: make format-check
+        run: make format-check
+
+  # ------------------------------------------------------------------
+  # 3. lint - static analysis (Makefile: lint + lint-cppcheck)
+  # ------------------------------------------------------------------
+  lint:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-apt-${{ hashFiles('.legion/environment/Containerfile', '.github/workflows/ci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install clang-tidy + cppcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            clang-tidy cppcheck pkg-config libpq-dev libcmocka-dev
+          rm -rf /var/lib/apt/lists/*
+
+      - name: make lint (clang-tidy)
+        run: make lint
+
+      - name: make lint-cppcheck (cppcheck)
+        run: make lint-cppcheck
+
+  # ------------------------------------------------------------------
+  # 4. lint-artifacts - shellcheck + hadolint + yamllint (Makefile: lint-all)
+  # ------------------------------------------------------------------
+  lint-artifacts:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-apt-${{ hashFiles('.legion/environment/Containerfile', '.github/workflows/ci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install shellcheck + yamllint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends shellcheck yamllint
+          rm -rf /var/lib/apt/lists/*
+
+      # hadolint is not packaged for Debian; install the same pinned,
+      # checksum-verified static binary as .legion/environment/Containerfile.
+      - name: Install hadolint (pinned static binary)
+        env:
+          HADOLINT_VERSION: v2.15.1
+        run: |
+          set -eu
+          arch="$(dpkg --print-architecture)"
+          case "$arch" in
+            amd64)
+              asset=hadolint-linux-x86_64
+              sha256=c7187db94eeeeca956519a6af171adc31453941a1e777961f6e680f697c8c507
+              ;;
+            arm64)
+              asset=hadolint-linux-arm64
+              sha256=f6198ef8090f404dbb771abfee086eb8c48ac177f30da7fd3510aca35b344b5d
+              ;;
+            *)
+              echo "unsupported architecture for hadolint: $arch" >&2
+              exit 1
+              ;;
+          esac
+          url="https://github.com/hadolint/hadolint/releases/download/${HADOLINT_VERSION}/${asset}"
+          curl -fsSL "$url" -o /tmp/hadolint
+          echo "${sha256}  /tmp/hadolint" | sha256sum -c -
+          sudo install -m 0755 /tmp/hadolint /usr/local/bin/hadolint
+          rm -f /tmp/hadolint
+          hadolint --version
+
+      - name: make lint-all (shellcheck + hadolint + yamllint)
+        run: make lint-all
+
+  # ------------------------------------------------------------------
+  # 5. test - ASan + UBSan build, unit tests via ctest
+  # ------------------------------------------------------------------
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-apt-${{ hashFiles('.legion/environment/Containerfile', '.github/workflows/ci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake make git curl ca-certificates \
+            pkg-config libpq-dev postgresql-client libcmocka-dev
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Configure & build (Sanitize = ASan+UBSan)
+        run: cmake -B build-asan -DCMAKE_BUILD_TYPE=Sanitize && cmake --build build-asan --parallel
+
+      - name: Run unit tests under ASan/UBSan
+        env:
+          ASAN_OPTIONS: "detect_leaks=1:halt_on_error=1"
+          UBSAN_OPTIONS: "halt_on_error=1:print_stacktrace=1"
+        run: ctest --test-dir build-asan --output-on-failure
+
+  # ------------------------------------------------------------------
+  # 6. tsan - TSan build, unit tests + server smoke run (README recipe)
+  # ------------------------------------------------------------------
+  tsan:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: dev
+          POSTGRES_DB: postgres
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d postgres"
+          --health-interval=2s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-apt-${{ hashFiles('.legion/environment/Containerfile', '.github/workflows/ci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake make git curl ca-certificates \
+            pkg-config libpq-dev postgresql-client libcmocka-dev
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Configure & build (SanitizeTSan)
+        run: cmake -B build-tsan -DCMAKE_BUILD_TYPE=SanitizeTSan && cmake --build build-tsan --parallel
+
+      - name: Run unit tests under TSan
+        env:
+          TSAN_OPTIONS: "halt_on_error=1"
+        run: ./build-tsan/dogs_api_tests
+
+      # The server cannot start without the dogs table (db_pool_init prepares
+      # 'SELECT * FROM dogs ...' on connect), so apply the same schema + seed
+      # step the integration job uses before the smoke run.
+      - name: Apply schema + seed (zarf/docker/postgres/init)
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "5433"
+          DB_USER: postgres
+          DB_PASSWORD: dev
+          DB_NAME: postgres
+        run: sh .legion/environment/env-setup.sh
+
+      - name: Smoke run under TSan
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "5433"
+          DB_USER: postgres
+          DB_PASSWORD: dev
+          DB_NAME: postgres
+          TSAN_OPTIONS: "halt_on_error=1"
+        run: |
+          set -eu
+          ./build-tsan/dogs_api > /tmp/dogs_api_tsan.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true' EXIT INT TERM
+
+          i=0
+          until curl -fsS http://127.0.0.1:8080/api/health > /dev/null 2>&1; do
+            i=$((i + 1))
+            if [ "$i" -ge 30 ]; then
+              echo "ERROR: server did not become healthy in time" >&2
+              cat /tmp/dogs_api_tsan.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+
+          echo "==> GET /api/health"
+          curl -fsS http://127.0.0.1:8080/api/health
+          echo
+          echo "==> GET /api/dogs?limit=2"
+          curl -fsS "http://127.0.0.1:8080/api/dogs?limit=2"
+          echo
+
+          kill "$SERVER_PID"
+          wait "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT INT TERM
+
+          if grep -q "ThreadSanitizer" /tmp/dogs_api_tsan.log; then
+            echo "ERROR: ThreadSanitizer report detected in server log" >&2
+            cat /tmp/dogs_api_tsan.log >&2
+            exit 1
+          fi
+          echo "TSan smoke run: clean"
+
+  # ------------------------------------------------------------------
+  # 7. integration - postgres service + schema/seed + API smoke checks
+  # ------------------------------------------------------------------
+  integration:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: dev
+          POSTGRES_DB: postgres
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d postgres"
+          --health-interval=2s
+          --health-timeout=5s
+          --health-retries=30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache apt packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            /var/cache/apt/archives
+            /var/lib/apt/lists
+          key: ${{ runner.os }}-apt-${{ hashFiles('.legion/environment/Containerfile', '.github/workflows/ci.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-apt-
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential cmake make git curl ca-certificates \
+            pkg-config libpq-dev postgresql-client libcmocka-dev jq
+          rm -rf /var/lib/apt/lists/*
+
+      - name: Build (Release)
+        run: cmake -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build --parallel
+
+      # Applies zarf/docker/postgres/init/01_schema.sql and seeds dogs from
+      # data.csv via client-side \copy (02_seed.sh's server-side COPY path
+      # only works inside the postgres container).
+      - name: Apply schema + seed (zarf/docker/postgres/init)
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "5433"
+          DB_USER: postgres
+          DB_PASSWORD: dev
+          DB_NAME: postgres
+        run: sh .legion/environment/env-setup.sh
+
+      - name: Run API + smoke checks
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "5433"
+          DB_USER: postgres
+          DB_PASSWORD: dev
+          DB_NAME: postgres
+        run: |
+          set -eu
+          ./build/dogs_api > /tmp/dogs_api_ci.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" 2>/dev/null || true; wait "$SERVER_PID" 2>/dev/null || true' EXIT INT TERM
+
+          i=0
+          until curl -fsS http://127.0.0.1:8080/api/health > /dev/null 2>&1; do
+            i=$((i + 1))
+            if [ "$i" -ge 30 ]; then
+              echo "ERROR: server did not become healthy in time" >&2
+              cat /tmp/dogs_api_ci.log >&2
+              exit 1
+            fi
+            sleep 1
+          done
+
+          echo "==> GET /api/health"
+          curl -fsS http://127.0.0.1:8080/api/health
+          echo
+
+          # db_status flips to true only after the first health tick.
+          i=0
+          until curl -fsS http://127.0.0.1:8080/api/health | grep -q '"db_status":true'; do
+            i=$((i + 1))
+            if [ "$i" -ge 30 ]; then
+              echo "ERROR: db_status never became UP" >&2
+              exit 1
+            fi
+            sleep 1
+          done
+          echo "==> db_status: UP"
+
+          echo "==> GET /api/dogs?limit=2"
+          curl -fsS "http://127.0.0.1:8080/api/dogs?limit=2" | tee /tmp/dogs.json
+          echo
+          jq -e '(.count == 2) and ((.data | length) == 2) and ((.next_cursor | length) > 0)' /tmp/dogs.json
+
+          kill "$SERVER_PID"
+          wait "$SERVER_PID" 2>/dev/null || true
+          trap - EXIT INT TERM

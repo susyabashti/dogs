@@ -10,3 +10,5 @@ rules:
     max: 120
   truthy:
     level: warning
+    # GitHub Actions workflow files use 'on:' as a trigger key.
+    check-keys: false

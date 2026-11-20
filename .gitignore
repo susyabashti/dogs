@@ -58,6 +58,8 @@ dkms.conf
 
 build/
 build-sanitize/
+# CI build trees (build-asan/, build-debug/, build-tsan/, ...)
+build-*/
 
 CMakeFiles/
 CMakeCache.txt
