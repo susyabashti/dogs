@@ -1,5 +1,4 @@
 #include "pthread.h"
-#include "string.h"
 #include "unistd.h"
 #include "db_health.h"
 #include "db/db.h"

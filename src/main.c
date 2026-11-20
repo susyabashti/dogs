@@ -1,8 +1,7 @@
-#include "stdio.h"
 #include "unistd.h"
 #include "civetweb.h"
-#include "string.h"
 #include "time.h"
+#include "signal.h"
 #include "db/db.h"
 #include "http/http.h"
 #include "http/router.h"
@@ -25,6 +24,10 @@ int main(void)
 {
   struct timespec start, end;
   clock_gettime(CLOCK_MONOTONIC, &start);
+
+  // Clean shutdown on Ctrl+C / SIGTERM instead of a hard kill.
+  signal(SIGINT, sigint_handler);
+  signal(SIGTERM, sigint_handler);
 
   register_dog_service_prepared_statements();
 

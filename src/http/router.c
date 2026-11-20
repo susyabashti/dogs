@@ -1,8 +1,6 @@
 #include "router.h"
 #include "handlers/handlers.h"
 #include "civetweb.h"
-#include "string.h"
-#include "stdio.h"
 #include "logging/logging.h"
 
 struct route routes[] = {

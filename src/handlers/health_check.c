@@ -1,7 +1,6 @@
 #include "civetweb.h"
 #include "string.h"
 #include "cJSON.h"
-#include "stdlib.h"
 #include "time.h"
 #include "services/db_health/db_health.h"
 
@@ -22,8 +21,8 @@ int health_handler(struct mg_connection *conn, void *ignored)
   cJSON_AddNumberToObject(json, "timestamp", (double)now);
 
   char *str = cJSON_PrintUnformatted(json);
-  unsigned long len = (unsigned long)strlen(str);
-  mg_send_http_ok(conn, "application/json", len);
+  size_t len = strlen(str);
+  mg_send_http_ok(conn, "application/json", (long long)len);
   mg_write(conn, str, len);
   cJSON_free(str);
   cJSON_Delete(json);

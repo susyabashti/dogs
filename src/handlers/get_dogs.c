@@ -3,7 +3,6 @@
 #include "db/db.h"
 #include "cJSON.h"
 #include "stdlib.h"
-#include "logging/logging.h"
 #include "services/dog_service/dog_service.h"
 #include "helpers/uuid/uuid.h"
 
@@ -77,8 +76,9 @@ int get_all_dogs_handler(struct mg_connection *conn, const struct mg_request_inf
     return 500;
   }
 
-  mg_send_http_ok(conn, "application/json", strlen(str));
-  mg_write(conn, str, strlen(str));
+  size_t body_len = strlen(str);
+  mg_send_http_ok(conn, "application/json", (long long)body_len);
+  mg_write(conn, str, body_len);
 
   // free the json string and json object
   cJSON_free(str);
@@ -142,7 +142,7 @@ int get_dog_by_id_handler(struct mg_connection *conn, const struct mg_request_in
   }
 
   size_t json_str_len = strlen(json_str);
-  mg_send_http_ok(conn, "application/json", json_str_len);
+  mg_send_http_ok(conn, "application/json", (long long)json_str_len);
   mg_write(conn, json_str, json_str_len);
   free(json_str);
 

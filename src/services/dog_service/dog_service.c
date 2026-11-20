@@ -146,7 +146,7 @@ cJSON *dog_service_build_list_response(Dog **dogs, size_t *out_count)
   }
 
   cJSON_AddItemToObject(json, "data", array);
-  cJSON_AddNumberToObject(json, "count", count);
+  cJSON_AddNumberToObject(json, "count", (double)count);
   cJSON_AddStringToObject(json, "next_cursor", next_cursor);
 
   if (out_count)

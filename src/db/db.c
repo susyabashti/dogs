@@ -22,9 +22,12 @@ static size_t num_prepared_stmts = 0;
 
 int db_register_prepared(const char *name, const char *sql)
 {
-  prepared_stmts = realloc(prepared_stmts, sizeof(PreparedStmt) * (num_prepared_stmts + 1));
-  if (!prepared_stmts)
+  // Grow into a temporary first: if realloc fails the old array must be
+  // kept alive (directly assigning would leak it).
+  PreparedStmt *grown = realloc(prepared_stmts, sizeof(PreparedStmt) * (num_prepared_stmts + 1));
+  if (!grown)
     return -1;
+  prepared_stmts = grown;
 
   prepared_stmts[num_prepared_stmts].name = strdup(name);
   prepared_stmts[num_prepared_stmts].sql = strdup(sql);
@@ -141,7 +144,7 @@ PGconn *db_pool_acquire(void)
   return conn;
 }
 
-void db_pool_release(PGconn *conn)
+void db_pool_release(const PGconn *conn)
 {
   pthread_mutex_lock(&pool_mutex);
   for (size_t i = 0; i < pool_size; i++)

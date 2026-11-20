@@ -14,7 +14,7 @@ int db_register_prepared(const char *name, const char *sql);
 PGconn *db_pool_acquire(void);
 
 // Return a connection to the pool.
-void db_pool_release(PGconn *conn);
+void db_pool_release(const PGconn *conn);
 
 // Close all connections and free the pool.
 void db_pool_destroy(void);

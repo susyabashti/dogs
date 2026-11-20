@@ -1,0 +1,56 @@
+---
+# clang-tidy configuration for project code only.
+# Vendored code (src/vendors) is never linted: the Makefile only feeds
+# project translation units to clang-tidy and headers of the project are
+# the only ones reachable through HeaderFilterRegex.
+
+# Analyze only the file passed on the command line; included project
+# headers are linted when they are the main file, vendored headers are not.
+HeaderFilterRegex: ^$
+
+WarningsAsErrors: '*'
+UseColor: true
+
+# Groups requested by the project: bugprone, the static analyzers,
+# misc and performance. Individual noisy checks that fight the project's
+# established conventions are disabled below. Reasons for the less obvious
+# ones:
+#  -misc-include-cleaner        include hygiene is not a project convention;
+#                               the check also only exists on clang-tidy >=17
+#  -bugprone-easily-swappable-parameters
+#                               the project passes fixed positional records
+#                               (e.g. dog_new); adjacent same-type parameters
+#                               are intentional and already ordered
+# Note: a folded YAML block scalar does not support inline comments, so the
+# ones above stay outside it.
+Checks: >
+  -*,
+  bugprone-*,
+  clang-analyzer-*,
+  misc-*,
+  performance-*,
+  -misc-const-correctness,
+  -misc-non-const-parameters,
+  -misc-ctad,
+  -misc-definitions-in-headers,
+  -misc-no-recursion,
+  -misc-static-assert,
+  -misc-throw-by-value-catch-by-reference,
+  -misc-unconventional-identifier,
+  -misc-uniqueptr-reset-release,
+  -misc-unused-alias-templates,
+  -misc-include-cleaner,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-exception-escape,
+  -bugprone-forwarding-reference-overload,
+  -bugprone-lambda-function-name,
+  -bugprone-multiple-decrement-statements-in-loop,
+  -bugprone-string-constructor,
+  -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+  -performance-move-const-arg,
+  -performance-no-automatic-move,
+  -performance-noexcept-move-constructor,
+  -performance-noexcept-swap,
+  -performance-openmp-parallelize,
+  -performance-unnecessary-copy-after-move,
+  -performance-unnecessary-value-param
